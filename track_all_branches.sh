@@ -5,22 +5,13 @@ echo "Fetching the remote repository..."
 git fetch --all
 echo "Fetched successfully"
 
-raw_remotes=$(git branch -r | grep -ve "^$" | sed -r "s/\s+//g")
+# Get all remote branches
+raw_remotes=$(git branch -r | sed -r "s/\s+//g" | grep -Ei "^[a-z0-9\/]+$")
 readarray -t remotes <<<"$raw_remotes"
-raw_existing_branches=$(git branch --list | sed -r 's/\*//g; s/\s+//g')
-# readarray -t existing_branches <<<"$raw_existing_branches"
-# echo "${#existing_branches[@]}"
-# echo "$existing_branches"
+# Set remote upstreams to matching local branches
 for remote in "${remotes[@]}"
 do
   branch_name=${remote#origin/}
-  echo "$branch_name"
-  if [[ ! ("$branch_name" =~ " $raw_exisiting_branches" || "$branch_name" =~ "$raw_exisiting_branches ") ]]
-  then
-    echo "if $branch_name"
-  fi
-  # git branch --set-upstream-to="${remote#origin/}" "$remote"
+  git branch "$branch_name" 2> /dev/null
+  git branch --set-upstream-to="${remote}" "$branch_name"
 done
-# git branch -r | grep -v '\->' | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g" | while read remote; do git branch --track "${remote#origin/}" "$remote"; done
-# git fetch --all
-# git pull --all
